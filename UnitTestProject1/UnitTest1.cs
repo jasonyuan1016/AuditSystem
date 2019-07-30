@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using AccountComparison;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -10,6 +11,8 @@ namespace UnitTestProject1
     public class UnitTest1
     {
         AccountingMatching accountingMatching = new AccountingMatching();
+        string connectString = "server=.; uid=sa; pwd=asdf1234; database=Test;";
+        #warning 指定写入DB
 
         [TestMethod]
         public void TestMethod123()
@@ -112,6 +115,41 @@ namespace UnitTestProject1
             accountingMatching.Match(dtA, dtB, keyFilids, ref dicDifference);
             //DataTable dtA, DataTable dtB, string[] keyFilids, ref Dictionary<int, DataTable> dicDifference
         }
+
+        [TestMethod]
+        public void TestInsertDB()
+        {
+#warning 指定csv文件路径
+            DataTable dtA = CSVFileHelper.OpenCSV("C:/DEMO/temp/0729.csv");
+            DataTable dtB = CSVFileHelper.OpenCSV("C:/DEMO/temp/2019-07-29Data.csv");
+#warning 指定主键
+            var keyFilids = new string[] { "AgentAcc", "VipAcc" };
+
+            var dicDifference = new Dictionary<int, DataTable>();
+            accountingMatching.Match(dtA, dtB, keyFilids, ref dicDifference);
+            DAL dal = new DAL(connectString);
+            foreach (var dic in dicDifference)
+            {
+                dal.InsertData2DB(dic);
+            }
+        }
+
+        #region DB表初始化，分别存差异数据1漏数据(A没 B有) 2数据多余(A有 B没) 3同主键不同内容
+        /*
+         if object_id('difference_1') is not null begin truncate table difference_1 drop table difference_1 end CREATE TABLE difference_1(
+                     [AgentAcc] [NVarChar]  (50) NULL ,[VipAcc] [NVarChar] (50) NULL ,[OrderCount] INT,[Pay] MONEY,[ProfitAndLoss] MONEY ,[RealPay] MONEY
+                    ) ON[PRIMARY];
+                    
+         if object_id('difference_2') is not null begin truncate table difference_2 drop table difference_2 end CREATE TABLE difference_2(
+                     [AgentAcc] [NVarChar]  (50) NULL ,[VipAcc] [NVarChar] (50) NULL ,[OrderCount] INT,[Pay] MONEY ,[ProfitAndLoss] MONEY ,[RealPay] MONEY
+                    ) ON[PRIMARY];
+                    
+         if object_id('difference_3') is not null begin truncate table difference_3 drop table difference_3 end CREATE TABLE difference_3(
+                     [AgentAcc] [NVarChar]  (50) NULL ,[VipAcc] [NVarChar] (50) NULL ,[OrderCount] INT,[Pay] MONEY ,[ProfitAndLoss] MONEY ,[RealPay] MONEY
+                    ) ON[PRIMARY];
+        */
+        #endregion
+
     }
 }
 

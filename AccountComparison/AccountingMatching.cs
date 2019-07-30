@@ -26,11 +26,11 @@ namespace AccountComparison
 
             foreach (DataRow drA in dtA.Rows)
             {
-                strWhere = keyFilids[0] + "=" + drA[keyFilids[0]];
+                strWhere = keyFilids[0] + "='" + drA[keyFilids[0]] + "'";
 
                 for (int i = 1; i < keyFilids.Length; i++)
                 {
-                    strWhere += " AND " + keyFilids[i] + "=" + drA[keyFilids[i]];
+                    strWhere += " AND " + keyFilids[i] + "='" + drA[keyFilids[i]] + "'";
                 }
                 var drB = dtBCopy.Select(strWhere);
                 if (drB == null || drB.Count() == 0)
